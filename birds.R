@@ -1,7 +1,7 @@
 rm(list=ls())
 library('betaMix')
 library("sp")
-library(Matrix)
+library("Matrix")
 # colors https://www.canva.com/learn/100-color-combinations/
 cols <- rep("#DA70D633",26)
 cols[c(2,4,15,23,24)] <- "#1995AD33"
@@ -11,15 +11,6 @@ cols[c(7,12,14,16,26)] <- "#3F681C33"
 cols[c(3,5,9,12,13,25)] <- "#FFBB0033"
 
 
-# cols <- rep("#DA70D633",21)
-# cols[c(8)] <- "#C99E1033"
-# cols[-c(8)] <- "#0095AD33"
-# 
-# cols[c(2,3,9,21)] <- "#C99E1033"
-# cols[c(8,19)] <- "#9B4F0F33"
-# cols[c(5,15)] <- "#3F681C33"
-# cols[-c(1,2,3,5,8,9,10,11,14,15,16,19,21)] <- "#0095AD33"
-# 
 
 reduceMat <- function() {
   CountsReduced <- Matrix(0,nrow=nrow(routes), ncol=nrow(birds))
@@ -97,9 +88,8 @@ load("birds2015.RData")
 M <- as.matrix(t(logCounts))
 N <- nrow(logCounts); P <- ncol(logCounts)
 res <- betaMix(M, delta = 1e-5, ppr=0.001,subsamplesize=30000)
-plotFittedBetaMix(M, res)
-A = Matrix(sin(res$angleMat)^2 < res$ppthr)
-diag(A) = FALSE
+plotFittedBetaMix(res)
+A = getAdjMat(res)
 
 gcBirds <- graphComponents(A,minCtr = 3, type = -1)
 gcBirds$labels <- colnames(A)

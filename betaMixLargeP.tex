@@ -1,0 +1,172 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[a4paper, total={6in, 10in}]{geometry}
+%\usepackage[square,sort,comma]{natbib}
+%\usepackage[R,stopserver]{runcode}
+\usepackage[R]{runcode}
+
+\usepackage{caption}
+%\usepackage{subcaption}
+\usepackage{subfig}
+\usepackage{listings}
+\usepackage{hyperref,fancyhdr}
+
+\let\code\texttt
+\let\proglang\textsf
+\newcommand{\pkg}[1]{{\fontshape{it}\selectfont #1}}
+\def\R{\textsf{R} }
+\newcommand{\sqltbl}[1]{{\textcolor{blue}{#1}}}
+
+\pagestyle{fancy}
+
+% Title Page
+\title{Graphical models with the betaMix package when the number of predictors is large}
+\author{Haim Bar}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This document demonstrates how one can use the \pkg{betaMix} package to fit a graphical model when the number of predictors is large. The betaMix method relies on the calculation of all pairwise correlations among $P$ predictors, and the main difficulty in applying any method which requires the calculation of the correlation matrix when $P$ is very large is that storing the $P\times P$ matrix  requires a very large memory. For example, with $P\approx 10^5$ and 8-bytes to store a double precision number, we will need about 75GB which is much more than standard computers have.
+
+To be able to handle such cases, we avoid the storage of a large correlation matrix. Instead, we do the following.
+\begin{enumerate}
+\item The input file is reformatted so that are $n$ observation in each of $P$ rows, and we use a fixed-width format.
+This allows us to use the \code{fseek} function in \proglang{C}, and read only two rows (predictors) at a time.
+\item Create A Sqlite database with 3 tables: 
+ \begin{itemize}
+ \item \sqltbl{metadata} contains $P$, $n$, and a standard deviation threshold $\kappa$ so that any predictor with sd$<\kappa$ is considered as a constant vector, and has zero correlation with all other predictors. The table also contains the input file name, the creation date, and a description.
+\item\sqltbl{predictors} contains the predictor number and name.
+\item \sqltbl{correlations} contains first node ID, second node ID, the correlation between the two predictors, and the statistic $z_{ij}$ which is what is used by \pkg{betaMix}
+\end{itemize}
+\item Read the input file and calculate the pairwise correlations. This is done using Rcpp. In two nested loops we get all pairs of vectors xi, xj where $i<j$ and calculate cor(xi,xj). With the fixed-width format we can access the selected pair very quickly and never keep more than two vectors in memory.
+\item Load the metadata, predictors, and correlations to Sqlite3.
+\item In \R, open the database, select a random set from the correlations table (e.g., 100,000 pairs).
+\item Fit the betaMix model using the subset, and get the threshold $\tau$ for $z_{ij}=sin^2(\theta_{i,j})$ below which pairs are considered as correlated.
+\item Finally, select from the database all rows with $z_{ij} < \tau$ as the edges in the graph.
+\end{enumerate}
+
+If the raw input file is too large to handle at once, it can be done in chunks (step 3). If the database becomes too large, it can be distributed across multiple machines (step 4). The random sample can be obtained (step 5) from any machine, or from all of them. The betaMix algorithm will only have to fit the model to this relatively small subset (although large from a CLT point of view). Selecting the pairs given $\tau$ which is obtained from betaMix can also be done in a distributed fashion (step 7).
+
+
+\section{Example -- the riboflavin data}
+The riboflavin data \cite{buhlmann2014} contains gene expression values for 4,088 genes, and the logarithm of vitamin B2 production rate for $N=71$ samples. We want to fit a graphical model, and especially focus on the nodes which are connected to the riboflavin levels. With $P=4089$ we can do it without using a SQL database.
+
+We start by loading the \pkg{betaMix} package and reading the input file.
+\showCode{R}{preprocessbetaMix.R}[5][6]
+
+\inlnR{```codeChunk = 1```}
+\runR{preprocessbetaMix.R}{B1}[cache]
+The file contains \inlnR{```cat(nrow(dat))```} rows and \inlnR{```cat(ncol(dat))```} columns.
+Whether the data is arranged as $N\times P$ or $P\times N$ we will create a formatted input file which has a fixed-width format, and in every block (line) there are all the samples for one predictor.
+In this case the response has already been log-transformed, as can be seen in the following histogram
+\showCode{R}{preprocessbetaMix.R}[11][11]
+\inlnR{```codeChunk = 2```}
+\runR{preprocessbetaMix.R}{B2}[cache]
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[scale=0.7]{tmp/histB2}
+\caption{The distribution of the logarithm of vitamin B2 production rate}
+\label{histB2}
+\end{center}
+\end{figure}
+
+
+\textbf{Notes}
+\begin{enumerate}
+\item Any data transformation has to take place before continuing to the next steps.
+\item There should be no missing data. Impute any missing values, or drop columns or samples with too many missing entries.
+\end{enumerate}
+
+\subsection{In-memory method}
+
+We will first do the analysis without using SQL. With $P=$\inlnR{```cat(ncol(dat))```} we can store the correlation matrix in memory on typical personal computers. Note that we use a conservative threshold of $1/(P(P-1)/2)$.
+\showCode{R}{preprocessbetaMix.R}[15][16]
+\showCode{R}{preprocessbetaMix.R}[18][18]
+\inlnR{```codeChunk = 3```}
+\runR{preprocessbetaMix.R}{B3}[cache]
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[scale=0.8]{tmp/fittedInMem}
+\caption{The distribution of $z_{ij}$ and the fitted model.}
+\label{fittedMem}
+\end{center}
+\end{figure}
+Figure \ref{fittedMem} shows that the mixture model fits the data very well. 
+
+We obtain a summary of the model fit and the adjacency matrix, and observe that the graph is not sparse at all. Over 2.8 million edges out of 8,357,916 are determined to be in the graphical model.
+\showCode{R}{preprocessbetaMix.R}[20][21]
+\includeOutput{B3}
+The posterior probability threshold for $z_{ij}$ was found to be = \inlnR{```with(resMem,cat(format(ppthr,digits=3)))```}, and find that the riboflavin production rate variable is correlated with \inlnR{```cat(length(which(adjMat1[1,]  > 0)))```} genes. In our paper we show that they are highly-interconnected.
+
+\subsection{SQL-based method}
+To store the correlation information in a SQL database (possibly distributed across multiple machines), we perform the following pre-processing procedure. The correlation calculations are done in \proglang{C}, with the \code{calcCorr()}  function in the \pkg{betaMix} package, and it never loads more than two rows (predictors) at a time to the memory. Importantly, in order to get a fast look-up of pairs we first convert the input to a fixed-width format, which allows us to jump from one predictor to another very quickly with the \code{fseek} function in \proglang{C}. In the next code, we reformat the input data and save it in a file (the variable \code{fin} below) which will be the input to the \code{calcCorr()} function.
+
+\inlnR{```codeChunk = 4```}
+\runR{preprocessbetaMix.R}{B4}[cache]
+
+In the process, we will also create sqlite batch-load files. One file contains the data for the \sqltbl{metadata} table. This information includes the formatted file name (the \code{fin} variable below), database name, maximum predictor name length, record size, the number of predictors, the sample size, a zero-variance threshold, the creation date, and a description.
+\showCode{R}{preprocessbetaMix.R}[25][34]
+In the \sqltbl{predictors} table we will store the predictor number and name. The \code{fin} file will have the predictor name, followed by $N$ values, so we have to choose the maximum length of the predictor names (the variable \code{MaxNameLen}). Here, we use the maximum length plus one, but in other datasets names can be very long, so we may consider using a substring, if the truncated names remain unique. 
+\showCode{R}{preprocessbetaMix.R}[35][53]
+
+Note that we got a unique length for all the predictors (\code{recSize} =\inlnR{```cat(recSize)```}) so the creation of the fixed-width file worked as desired. The metadata file looks like this:
+
+\lstinputlisting[basicstyle=\ttfamily\small,breakatwhitespace=false, breaklines=true,frame=single]{tmp/riboflavin_meta.txt}
+
+And the first four lines in the predictors file look like this:
+\lstinputlisting[breakatwhitespace=false, breaklines=true,firstline=1, lastline=4,frame=single]{tmp/riboflavin_names.txt}
+
+Now we can create the sqlite batch-load file for the \sqltbl{correlations} table. It has four columns: i,j,  theta\_ij, z\_ij where i,j are the predictor numbers, theta\_ij is the angle between them, and z\_ij is the sine-squared of theta\_ij, which is used by \pkg{betaMix}.
+Note that the \code{calcCorr()} function takes two file names (input and output, the maximum length of predictor names), and \code{recSize} is the total length of a block in the fixed-width format.
+\showCode{R}{preprocessbetaMix.R}[55][56]
+The first four lines in the correlations file look like this:
+\lstinputlisting[basicstyle=\ttfamily\small,breakatwhitespace=false, breaklines=true,firstline=1, lastline=4,frame=single]{tmp/riboflavin_cors.txt}
+
+\inlnR{```codeChunk = 5```}
+\runR{preprocessbetaMix.R}{B5}[cache]
+To load the tables to sqlite, we create a batch file as follows:
+\showCode{R}{preprocessbetaMix.R}[59][64]
+The batch file will contain the following six lines:
+\lstinputlisting[basicstyle=\ttfamily\small,breakatwhitespace=false, breaklines=true,frame=single]{tmp/sqlbatch}
+Start the sqlite session by invoking the following from a terminal:\\
+\verb|sqlite3 tmp/riboflavin|\\
+Run the commands in the sqlbatch file. End the sqlite session by typing \code{.quit}\\
+Except for the sqlite database (\verb|tmp/riboflavin|) all the other files which were created by the script can now be deleted.
+The riboflavin sqlite database file is available at \url{https://uconn.sharepoint.com/:u:/r/sites/HaimBar/Shared\%20Documents/betaMix/Databases/riboflavin?csf=1&web=1&e=iA6Bnn} (255 MB).
+
+At this point we can do the analysis with \pkg{betaMix}. The procedure is nearly identical, except that we must give the database name, instead of a matrix:
+\showCode{R}{preprocessbetaMix.R}[67][69]
+\inlnR{```codeChunk = 6```}
+\runR{preprocessbetaMix.R}{B6}[cache]
+The fitted model plot and the model summary are obtained exactly as in the in-memory example. For example, the model summary is as follows:
+\inlnR{```shortSummary(resSQL)```}[vbox]
+
+Getting the adjacency matrix is similar to the in-memory method, but we must provide the \code{dbname} argument, as in the example above. 
+
+In this case the riboflavin production rate variable is correlated with \inlnR{```cat(length(which(adjMat2[1,]  > 0)))```} predictors, which we obtain by using \verb|length(which(adjMat2[1,]  > 0))|.
+
+When $P$ is large the adjacency matrix may be too large to load to memory. We can obtain a sparse matrix by choosing which nodes we want to focus on. For example, we can obtain all the neighbors of the response variable, and get an adjacency matrix which contains only edges linking the set which consists of the response variable and its direct neighbors. In the following code we set \code{nodes = b2nbrs} which means that the returned adjacency matrix will only contain links among the nodes in the \code{b2nbrs} set. Figure \ref{b2nbrs} shows that the network around the q\_EIBFLV node.
+\showCode{R}{preprocessbetaMix.R}[72][78]
+\inlnR{```codeChunk = 7```}
+\runR{preprocessbetaMix.R}{B7}[cache]
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[scale=0.9]{tmp/B2nbrs}
+\caption{The network for the riboflavin variable.}
+\label{b2nbrs}
+\end{center}
+\end{figure}
+
+\section{Conclusion}
+Large-scale network analysis is computationally challenging, and methods which rely on calculating the correlation matrix and storing it in memory can only handle several thousands of nodes.
+The procedure we have described makes it possible to perform graphical model analysis on very large networks. The data, and especially the large correlation matrix, can be stored and queried across multiple machines thus making it possible to fit the betaMix model to handle essentially any number of nodes.
+
+\bibliographystyle{abbrv}
+\bibliography{references}
+
+\fancyfoot[C]{This document was compiled using the runCode \LaTeX package}
+
+\end{document}          
+

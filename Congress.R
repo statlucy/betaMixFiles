@@ -81,9 +81,8 @@ cat("total issues", length(unique(issues)),"\n")
 M <- t(M) # put the congress members in the columns and the issues in rows
 # run the algorithm:
 res <- betaMix(M, delta = 1e-4, ppr=0.001)
-plotFittedBetaMix(M,res, yLim = 16)
-A <-  Matrix(sin(res$angleMat)^2 < res$ppthr)
-diag(A) <- FALSE
+plotFittedBetaMix(res, yLim = 16)
+A <-  getAdjMat(res)
 gc1 <- graphComponents(A)
 summarizeClusters(gc1) # two large blocks
 

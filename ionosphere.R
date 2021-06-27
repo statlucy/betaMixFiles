@@ -30,9 +30,8 @@ compsset <- setdiff(1:ncol(M), sset)
 # run the betaMix algorithm on all the data in order to get the 
 # links between predictors. 
 res <- betaMix(M, delta = 1e-5, ppr=0.001,ind=T, subsamplesize = 30000)
-plotFittedBetaMix(M,res, yLim = 10)
-A <-  Matrix(sin(res$angleMat)^2 <  res$ppthr)
-diag(A) <- FALSE
+plotFittedBetaMix(res, yLim = 10)
+A <-  getAdjMat(res)
 B <- as.matrix(A)*cos(res$angleMat)
 B[lower.tri(B)] <- 0
 gc1 <- graphComponents(A,type=1,minCtr = 3)
@@ -42,7 +41,7 @@ for (i in 0:max(gc1$clustNo)) {
   print(table(grp[which(gc1$clustNo ==i)]))
 }
 
-# find for each observarion from the test set how many of
+# find for each observation from the test set how many of
 # its neighbors among the training set are in each class,
 # and assign it the majority class.
 cls1 <- rep("g", length=length(compsset))
@@ -92,9 +91,8 @@ plot(graph.adjacency(A, mode="undirected"),
 # network:
 Mall <- rbind(M, as.numeric(as.factor(grp)))
 resall <- betaMix(Mall, delta = 1e-5, ppr=0.001,ind=T, subsamplesize = 30000)
-plotFittedBetaMix(Mall,resall, yLim = 10)
-A <-  Matrix(sin(resall$angleMat)^2 <  resall$ppthr)
-diag(A) <- FALSE
+plotFittedBetaMix(resall, yLim = 10)
+A <-  getAdjMat(res)
 B <- as.matrix(A)*cos(resall$angleMat)
 B[lower.tri(B)] <- 0
 gc2 <- graphComponents(A,type=1,minCtr = 3)

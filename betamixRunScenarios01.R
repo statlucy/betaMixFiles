@@ -40,9 +40,7 @@ for (N in c(200, 500)) {
       res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
       if(repno == 1)
         plotResults(res)
-      zz <- sin(res$angleMat)^2
-      zz0 <- Matrix(zz < res$ppthr)
-      diag(zz0) <- FALSE
+      zz0 <- getAdjMat(res)
       # Matrix::image(zz0[1:250,1:250])
       cat("Total True",sum(gendat$trueStructure[1,]),
           "TP", sum(zz0[1,] & gendat$trueStructure[1,]),
@@ -70,9 +68,7 @@ for (N in c(200, 500)) {
           res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
-          zz <- sin(res$angleMat)^2
-          zz0 <- Matrix(zz < res$ppthr)
-          diag(zz0) <- FALSE
+          zz0 <- getAdjMat(res)
           # Matrix::image(zz0[1:250,1:250])
           cat("Total True",sum(gendat$trueStructure[1,]),
               "TP", sum(zz0[1,] & gendat$trueStructure[1,]),"FP", sum(zz0[1,] & !gendat$trueStructure[1,]),"\n")
@@ -99,9 +95,7 @@ for (N in c(200, 500)) {
         res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
         if(repno == 1)
           plotResults(res)
-        zz <- sin(res$angleMat)^2
-        zz0 <- Matrix(zz < res$ppthr)
-        diag(zz0) <- FALSE
+        zz0 <- getAdjMat(res)
         # Matrix::image(zz0[1:250,1:250])
         cat("Total True",sum(gendat$trueStructure)/2,
             "TP", sum(zz0 & (toeplitz(1:P)==2) & gendat$trueStructure)/2,
@@ -129,9 +123,7 @@ for (N in c(200, 500)) {
         res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
         if(repno == 1)
           plotResults(res)
-        zz <- sin(res$angleMat)^2
-        zz0 <- Matrix(zz < res$ppthr)
-        diag(zz0) <- FALSE
+        zz0 <- getAdjMat(res)
         # Matrix::image(zz0[1:250,1:250])
         cat("Total True",sum(gendat$trueStructure)/2,
             "TP", sum(zz0 & (toeplitz(1:P)==2) & gendat$trueStructure)/2,
@@ -159,9 +151,7 @@ for (N in c(200, 500)) {
           res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
-          zz <- sin(res$angleMat)^2
-          zz0 <- Matrix(zz < res$ppthr)
-          diag(zz0) <- FALSE
+          zz0 <- getAdjMat(res)
           # Matrix::image(zz0[1:250,1:250])
           cat("Total True",sum(gendat$trueStructure)/2,
               "TP", sum(zz0 & gendat$trueStructure)/2,
@@ -190,9 +180,7 @@ for (N in c(200, 500)) {
           res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
-          zz <- sin(res$angleMat)^2
-          zz0 <- Matrix(zz < res$ppthr)
-          diag(zz0) <- FALSE
+          zz0 <- getAdjMat(res)
           # Matrix::image(zz0[1:250,1:250])
           cat("Total True",sum(gendat$trueStructure)/2,
               "TP", sum(zz0  & gendat$trueStructure)/2,
@@ -220,9 +208,7 @@ for (N in c(200, 500)) {
         res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
         if(repno == 1)
           plotResults(res)
-        zz <- sin(res$angleMat)^2
-        zz0 <- Matrix(zz < res$ppthr)
-        diag(zz0) <- FALSE
+        zz0 <- getAdjMat(res)
         # Matrix::image(zz0[1:250,1:250])
         cat("Total True",sum(gendat$trueStructure)/2,
             "TP", sum(zz0  & gendat$trueStructure)/2,
@@ -252,9 +238,7 @@ for (N in c(200, 500)) {
           res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
-          zz <- sin(res$angleMat)^2
-          zz0 <- Matrix(zz < res$ppthr)
-          diag(zz0) <- FALSE
+          zz0 <- getAdjMat(res)
           # Matrix::image(zz0[1:250,1:250])
           cat("Total True",sum(gendat$trueStructure)/2,
               "TP", sum(zz0  & gendat$trueStructure)/2,
@@ -283,9 +267,7 @@ for (N in c(200, 500)) {
           res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
-          zz <- sin(res$angleMat)^2
-          zz0 <- Matrix(zz < res$ppthr)
-          diag(zz0) <- FALSE
+          zz0 <- getAdjMat(res)
           # Matrix::image(zz0[1:250,1:250])
           cat("Total True",sum(gendat$trueStructure)/2,
               "TP", sum(zz0  & gendat$trueStructure)/2,

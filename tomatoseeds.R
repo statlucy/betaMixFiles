@@ -4,7 +4,7 @@
 #
 library("betaMix")
 library("igraph")
-library(xtable)
+library("xtable")
 
 filenames <- c("ST000561_AN000862.txt", "ST000561_AN000863.txt")
 group <- c("Dry Seeds", "6 hours Imbibed Seeds")
@@ -27,17 +27,16 @@ for (grp in 1:2) {
   
   exc <- which(substr(mtbnames,1,3) == "RI_")
   mtbnames <- mtbnames[-exc]
-  Mall <- Mall[-exc,]
+  Mall <- t(Mall[-exc,])
   
   M <- log2(Mall)
   Mat[[grp]] <- M
-  P <- nrow(M); N <- ncol(M)
-  res <- betaMix(t(M),ind=TRUE, delta=1e-4,ppr=0.01)
-  plotFittedBetaMix(t(M),res)
+  N <- nrow(M); P <- ncol(M)
+  res <- betaMix(M,ind=TRUE, delta=1e-4,ppr=0.01)
+  plotFittedBetaMix(res)
   bm[[grp]] <- res
-  zz0 = Matrix(sin(res$angleMat)^2 < res$ppthr)
-  diag(zz0) = FALSE
-  image(zz0)
+  zz0 = getAdjMat(res)
+  #image(zz0)
   bmclustinfo[[grp]] <- graphComponents(zz0,minCtr = 2,type=1)
   bmclustinfo[[grp]]$labels <- mtbnames
   for (cls in 1:max(bmclustinfo[[grp]]$clustNo)) {
