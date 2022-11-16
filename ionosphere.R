@@ -29,7 +29,7 @@ compsset <- setdiff(1:ncol(M), sset)
 
 # run the betaMix algorithm on all the data in order to get the 
 # links between predictors. 
-res <- betaMix(M, delta = 1e-5, ppr=0.001,ind=T, subsamplesize = 30000)
+res <- betaMix(M, maxalpha = 1e-5, ppr=0.001,ind=T, subsamplesize = 30000)
 plotFittedBetaMix(res, yLim = 10)
 A <-  getAdjMat(res)
 B <- as.matrix(A)*cos(res$angleMat)
@@ -90,7 +90,7 @@ plot(graph.adjacency(A, mode="undirected"),
 # an unsupervised approach: add the class as a variable, and find the
 # network:
 Mall <- rbind(M, as.numeric(as.factor(grp)))
-resall <- betaMix(Mall, delta = 1e-5, ppr=0.001,ind=T, subsamplesize = 30000)
+resall <- betaMix(Mall, maxalpha = 1e-5, ppr=0.001,ind=T, subsamplesize = 30000)
 plotFittedBetaMix(resall, yLim = 10)
 A <-  getAdjMat(res)
 B <- as.matrix(A)*cos(resall$angleMat)

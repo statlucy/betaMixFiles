@@ -8,7 +8,7 @@ library(igraph)
 fname = "riboflavin1.csv"
 M <- read.csv(fname,sep="\t")
 N <- nrow(M); P <- ncol(M)
-res <- betaMix(as.matrix(M),delta = 1e-6,ppr = 1e-3, subsamplesize=50000, ind = TRUE)
+res <- betaMix(as.matrix(M),maxalpha = 1e-6,ppr = 1e-3, subsamplesize=50000, ind = TRUE)
 
 #  pdf("riboflavinFit.pdf",width = 6, height = 6)
 plotFittedBetaMix(res)

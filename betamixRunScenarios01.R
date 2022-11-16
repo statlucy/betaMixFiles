@@ -37,7 +37,7 @@ for (N in c(200, 500)) {
     for (repno in reps){
       seedCt <- seedCt+1; set.seed(listOfSeeds[seedCt])
       gendat <- genData('lmSimple', P, N)
-      res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
+      res <- betaMix(gendat$dataMat, maxalpha = 1/choose(P,2), ppr = 0.01, ind = T)
       if(repno == 1)
         plotResults(res)
       zz0 <- getAdjMat(res)
@@ -65,7 +65,7 @@ for (N in c(200, 500)) {
         for (repno in reps){
           seedCt <- seedCt+1; set.seed(listOfSeeds[seedCt])
           gendat <- genData('lmCor', P, N, cortype, corcoef)
-          res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
+          res <- betaMix(gendat$dataMat, maxalpha = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
           zz0 <- getAdjMat(res)
@@ -92,7 +92,7 @@ for (N in c(200, 500)) {
       for (repno in reps){
         seedCt <- seedCt+1; set.seed(listOfSeeds[seedCt])
         gendat <- genData('ar1', P, N, corcoef)
-        res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
+        res <- betaMix(gendat$dataMat, maxalpha = 1/choose(P,2), ppr = 0.01, ind = T)
         if(repno == 1)
           plotResults(res)
         zz0 <- getAdjMat(res)
@@ -120,7 +120,7 @@ for (N in c(200, 500)) {
       for (repno in reps){
         seedCt <- seedCt+1; set.seed(listOfSeeds[seedCt])
         gendat <- genData('blockar1', P=P, N=N, K=20, corcoef=corcoef)
-        res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
+        res <- betaMix(gendat$dataMat, maxalpha = 1/choose(P,2), ppr = 0.01, ind = T)
         if(repno == 1)
           plotResults(res)
         zz0 <- getAdjMat(res)
@@ -148,7 +148,7 @@ for (N in c(200, 500)) {
         for (repno in reps){
           seedCt <- seedCt+1; set.seed(listOfSeeds[seedCt])
           gendat <- genData('band', P=P, N=N, corcoef=corcoef, BW=BW)
-          res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
+          res <- betaMix(gendat$dataMat, maxalpha = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
           zz0 <- getAdjMat(res)
@@ -177,7 +177,7 @@ for (N in c(200, 500)) {
         for (repno in reps){
           seedCt <- seedCt+1; set.seed(listOfSeeds[seedCt])
           gendat <- genData('cls', P=P, N=N, corcoef=corcoef,clustsize=clustsize)
-          res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
+          res <- betaMix(gendat$dataMat, maxalpha = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
           zz0 <- getAdjMat(res)
@@ -205,7 +205,7 @@ for (N in c(200, 500)) {
       for (repno in reps){
         seedCt <- seedCt+1; set.seed(listOfSeeds[seedCt])
         gendat <- genData('rbk', P=P, N=N, g=40, corcoef=corcoef)
-        res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
+        res <- betaMix(gendat$dataMat, maxalpha = 1/choose(P,2), ppr = 0.01, ind = T)
         if(repno == 1)
           plotResults(res)
         zz0 <- getAdjMat(res)
@@ -235,7 +235,7 @@ for (N in c(200, 500)) {
         for (repno in reps){
           seedCt <- seedCt+1; set.seed(listOfSeeds[seedCt])
           gendat <- genData('hub', P=P, N=N, corcoef=corcoef,hubsize=hubsize)
-          res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
+          res <- betaMix(gendat$dataMat, maxalpha = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
           zz0 <- getAdjMat(res)
@@ -264,7 +264,7 @@ for (N in c(200, 500)) {
         for (repno in reps){
           seedCt <- seedCt+1; set.seed(listOfSeeds[seedCt])
           gendat <- genData('cycle', P=P, N=N, corcoef=corcoef,cyclesize=cyclesize)
-          res <- betaMix(gendat$dataMat, delta = 1/choose(P,2), ppr = 0.01, ind = T)
+          res <- betaMix(gendat$dataMat, maxalpha = 1/choose(P,2), ppr = 0.01, ind = T)
           if(repno == 1)
             plotResults(res)
           zz0 <- getAdjMat(res)

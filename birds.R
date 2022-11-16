@@ -87,7 +87,7 @@ year <- 2015
 load("birds2015.RData")
 M <- as.matrix(t(logCounts))
 N <- nrow(logCounts); P <- ncol(logCounts)
-res <- betaMix(M, delta = 1e-5, ppr=0.001,subsamplesize=30000)
+res <- betaMix(M, maxalpha = 1e-5, ppr=0.001,subsamplesize=30000)
 plotFittedBetaMix(res)
 A = getAdjMat(res)
 

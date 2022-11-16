@@ -13,7 +13,7 @@ switch (codeChunk,
         },
         '3' = {
           #### In-memory method
-          resMem <- betaMix(dat,ind=TRUE, subsamplesize = 100000, delta = 1/choose(ncol(dat),2),ppr=0.001, msg=FALSE)
+          resMem <- betaMix(dat,ind=TRUE, subsamplesize = 100000, maxalpha = 1/choose(ncol(dat),2),ppr=0.001, msg=FALSE)
           pdf("tmp/fittedInMem.pdf",width = 4, height = 4)
           plotFittedBetaMix(resMem,yLim=30)
           dev.off()
@@ -65,7 +65,7 @@ CREATE TABLE correlations (node1 INTEGER, node2 INTEGER,corr DOUBLE,zij DOUBLE);
         },
         '6' = {
           dbfile <- sprintf("%s/%s",outdir,dbname)
-          resSQL <- betaMix(dbname=dbfile, ind=TRUE, subsamplesize = 100000, delta = 1/choose(ncol(dat),2), ppr=0.001, msg=FALSE)
+          resSQL <- betaMix(dbname=dbfile, ind=TRUE, subsamplesize = 100000, maxalpha = 1/choose(ncol(dat),2), ppr=0.001, msg=FALSE)
           adjMat2 <- getAdjMat(resSQL,dbname=dbfile)
         },
         '7' = {

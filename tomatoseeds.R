@@ -32,7 +32,7 @@ for (grp in 1:2) {
   M <- log2(Mall)
   Mat[[grp]] <- M
   N <- nrow(M); P <- ncol(M)
-  res <- betaMix(M,ind=TRUE, delta=1e-4,ppr=0.01)
+  res <- betaMix(M,ind=TRUE, maxalpha=1e-4,ppr=0.01)
   plotFittedBetaMix(res)
   bm[[grp]] <- res
   zz0 = getAdjMat(res)

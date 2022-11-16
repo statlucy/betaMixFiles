@@ -80,7 +80,7 @@ cat("total issues", length(unique(issues)),"\n")
 
 M <- t(M) # put the congress members in the columns and the issues in rows
 # run the algorithm:
-res <- betaMix(M, delta = 1e-4, ppr=0.001)
+res <- betaMix(M, maxalpha = 1e-4, ppr=0.001)
 plotFittedBetaMix(res, yLim = 16)
 A <-  getAdjMat(res)
 gc1 <- graphComponents(A)
