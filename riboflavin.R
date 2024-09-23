@@ -1,7 +1,8 @@
 #
 # The analysis of the riboflavin data using the betaMix method
 #
-
+library(devtools)
+#install_github("HaimBar/betaMix")
 library(betaMix)
 library(igraph)
 
@@ -22,3 +23,4 @@ plot(graph.adjacency(Msub, mode="undirected"),  vertex.label= rownames(Msub),
      vertex.label.cex=0.7, vertex.size=0.1, vertex.label.color='blue',
      edge.color='gray90',  asp=.5)
 #  dev.off()
+
